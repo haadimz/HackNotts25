@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="style.css">
+    <title>Customify.ai</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 163, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(138, 43, 226, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .main-container {
+            max-width: 1000px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #00ffa3;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .header h1 {
+            color: #fff;
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: -1.5px;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .card {
+            background: rgba(20, 20, 20, 0.8);
+            border-radius: 24px;
+            padding: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+        }
+
+        .grid-container {
+            background: #000;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 35px;
+            border: 1px solid rgba(0, 255, 163, 0.1);
+            box-shadow: 0 0 40px rgba(0, 255, 163, 0.05);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .image-button {
+            width: 100%;
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 12px;
+        }
+
+        .image-button::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0, 255, 163, 0.2) 0%, rgba(138, 43, 226, 0.2) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .image-button:hover {
+            transform: translateY(-4px) scale(1.02);
+            border-color: rgba(0, 255, 163, 0.4);
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.5),
+                0 0 20px rgba(0, 255, 163, 0.2);
+        }
+
+        .image-button:hover::before {
+            opacity: 1;
+        }
+
+        .image-button.selected {
+            border-color: #00ffa3;
+            background: linear-gradient(135deg, #0d4d3a 0%, #1a1a1a 100%);
+            box-shadow: 
+                0 0 0 3px rgba(0, 255, 163, 0.2),
+                0 10px 30px rgba(0, 255, 163, 0.3);
+            transform: scale(0.98);
+        }
+
+        .image-button.selected::before {
+            opacity: 0.5;
+        }
+
+        .image-button.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #00ffa3;
+            color: #000;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 900;
+            box-shadow: 0 4px 12px rgba(0, 255, 163, 0.5);
+            animation: checkPop 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes checkPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .image-button img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .selection-count {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.95rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .selection-count span {
+            font-weight: 800;
+            color: #00ffa3;
+            font-size: 1.4rem;
+            margin-right: 4px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00ffa3 0%, #00cc82 100%);
+            color: #000;
+            box-shadow: 0 4px 20px rgba(0, 255, 163, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #00cc82 0%, #009966 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn-primary:hover::before {
+            opacity: 1;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(0, 255, 163, 0.4);
+        }
+
+        .btn-primary span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-primary:disabled:hover {
+            transform: none;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .card {
+                padding: 30px 20px;
+            }
+
+            .grid-container {
+                padding: 25px;
+            }
+
+            .grid {
+                gap: 12px;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .button-group {
+                width: 100%;
+            }
+
+            .btn {
+                flex: 1;
+                font-size: 0.9rem;
+                padding: 12px 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <div class="logo">Customify.ai</div>
+            <h1>Pick Your Style</h1>
+            <p>Select the images that speak to you</p>
+        </div>
+
+        <div class="card">
+            <div class="grid-container">
+                <div class="grid">
+                    <button class="image-button" data-id="1"></button>
+                    <button class="image-button" data-id="2"></button>
+                    <button class="image-button" data-id="3"></button>
+                    <button class="image-button" data-id="4"></button>
+                    <button class="image-button" data-id="5"></button>
+                    <button class="image-button" data-id="6"></button>
+                    <button class="image-button" data-id="7"></button>
+                    <button class="image-button" data-id="8"></button>
+                    <button class="image-button" data-id="9"></button>
+                    <button class="image-button" data-id="10"></button>
+                    <button class="image-button" data-id="11"></button>
+                    <button class="image-button" data-id="12"></button>
+                </div>
+            </div>
+
+            <div class="actions">
+                <div class="selection-count">
+                    <span id="count">0</span> selected
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" id="clearBtn">Clear All</button>
+                    <button class="btn btn-primary" id="submitBtn" disabled>
+                        <span>Continue</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const buttons = document.querySelectorAll('.image-button');
+        const countDisplay = document.getElementById('count');
+        const submitBtn = document.getElementById('submitBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        let selectedCount = 0;
+
+        function updateCount() {
+            selectedCount = document.querySelectorAll('.image-button.selected').length;
+            countDisplay.textContent = selectedCount;
+            submitBtn.disabled = selectedCount === 0;
+        }
+
+        buttons.forEach(button => {
+            button.addEventListener('click', function() {
+                this.classList.toggle('selected');
+                updateCount();
+            });
+        });
+
+        clearBtn.addEventListener('click', () => {
+            buttons.forEach(button => button.classList.remove('selected'));
+            updateCount();
+        });
+
+        submitBtn.addEventListener('click', () => {
+            const selected = Array.from(document.querySelectorAll('.image-button.selected'))
+                .map(btn => btn.dataset.id);
+            console.log('Selected images:', selected);
+            alert(`You've selected ${selected.length} image(s)`);
+        });
+
+        // Example: To add images to buttons, use:
+        // buttons[0].innerHTML = '<img src="your-image-url.jpg" alt="Image 1">';
+    </script>
+</body>
+</html>
