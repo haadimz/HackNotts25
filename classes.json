@@ -1,0 +1,5 @@
+{"classes":[
+    {"Type": "Rich-Boy","age_group": "16-18","gender":"Male","budget_class":"affluent","style":"formal" },
+    {"Type":"Rich-Girl","age_group": "16-18","gender":"Female","budget_class":"affluent","style":"formal" },
+    {"Type":"Rich-StudentM","age_group": "18-21","gender":"Male","budget_class":"affluent","style":"casual" }  
+]}
