@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Recommendations | Customify.ai</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 163, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(138, 43, 226, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #00ffa3;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .header h1 {
+            color: #fff;
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: -1.5px;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .feedback-card {
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid rgba(0, 255, 163, 0.2);
+            border-radius: 16px;
+            padding: 30px 50px;
+            margin-bottom: 50px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(0, 255, 163, 0.1);
+        }
+
+        .feedback-card p {
+            color: #fff;
+            font-size: 1.3rem;
+            font-weight: 500;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .feedback-card .highlight {
+            color: #00ffa3;
+            font-weight: 700;
+        }
+
+        .main-carousel-section {
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 50px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        .carousel-container {
+            position: relative;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .carousel-wrapper {
+            overflow: hidden;
+            border-radius: 16px;
+            background: #000;
+            border: 1px solid rgba(0, 255, 163, 0.1);
+        }
+
+        .carousel {
+            display: flex;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .carousel-item {
+            min-width: 100%;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 550px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-image::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0, 255, 163, 0.1) 0%, rgba(138, 43, 226, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .carousel-item:hover .product-image::before {
+            opacity: 1;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .placeholder-text {
+            position: absolute;
+            color: rgba(0, 255, 163, 0.3);
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 255, 163, 0.1);
+            color: #00ffa3;
+            border: 2px solid rgba(0, 255, 163, 0.3);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+        }
+
+        .carousel-btn:hover {
+            background: rgba(0, 255, 163, 0.2);
+            border-color: #00ffa3;
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 255, 163, 0.4);
+        }
+
+        .carousel-btn.prev {
+            left: -30px;
+        }
+
+        .carousel-btn.next {
+            right: -30px;
+        }
+
+        .carousel-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .indicator:hover {
+            background: rgba(0, 255, 163, 0.4);
+        }
+
+        .indicator.active {
+            background: #00ffa3;
+            width: 40px;
+            border-radius: 6px;
+            box-shadow: 0 0 10px rgba(0, 255, 163, 0.5);
+        }
+
+        .bottom-section {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 40px;
+            align-items: end;
+        }
+
+        .info-card {
+            background: rgba(0, 255, 163, 0.05);
+            border: 1px solid rgba(0, 255, 163, 0.2);
+            border-radius: 16px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .info-card h3 {
+            color: #00ffa3;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-card p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        .side-products {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .side-product {
+            width: 140px;
+            height: 200px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .side-product::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0, 255, 163, 0.2) 0%, rgba(138, 43, 226, 0.2) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .side-product:hover {
+            transform: translateY(-8px);
+            border-color: rgba(0, 255, 163, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 255, 163, 0.2);
+        }
+
+        .side-product:hover::before {
+            opacity: 1;
+        }
+
+        .side-product img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .side-product .placeholder-text {
+            font-size: 0.9rem;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .home-btn-wrapper {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .home-btn {
+            background: linear-gradient(135deg, #00ffa3 0%, #00cc82 100%);
+            color: #000;
+            border: none;
+            padding: 16px 40px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 255, 163, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .home-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #00cc82 0%, #009966 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .home-btn:hover::before {
+            opacity: 1;
+        }
+
+        .home-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(0, 255, 163, 0.4);
+        }
+
+        .home-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (max-width: 1200px) {
+            .bottom-section {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .home-btn-wrapper {
+                justify-content: center;
+            }
+
+            .side-products {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .main-carousel-section {
+                padding: 30px 20px;
+            }
+
+            .carousel-container {
+                padding: 0 50px;
+            }
+
+            .product-image {
+                height: 400px;
+            }
+
+            .carousel-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 1.5rem;
+            }
+
+            .carousel-btn.prev {
+                left: -15px;
+            }
+
+            .carousel-btn.next {
+                right: -15px;
+            }
+
+            .side-products {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .side-product {
+                width: 130px;
+                height: 180px;
+            }
+
+            .feedback-card {
+                padding: 25px 30px;
+            }
+
+            .feedback-card p {
+                font-size: 1.1rem;
+            }
+        }
+
+        .click-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ffa3;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            border: 1px solid rgba(0, 255, 163, 0.3);
+        }
+
+        .carousel-item:hover .click-hint {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Customify.ai</div>
+            <h1>Your Personalized Picks</h1>
+            <p>Curated just for you based on your style preferences</p>
+        </div>
+
+        <div class="feedback-card">
+            <p>Based on your <span class="highlight">7 theme selections</span>, we've found products that match your unique style</p>
+        </div>
+
+        <div class="main-carousel-section">
+            <div class="carousel-container">
+                <button class="carousel-btn prev" onclick="moveCarousel(-1)">‹</button>
+                <div class="carousel-wrapper">
+                    <div class="carousel" id="carousel">
+                        <div class="carousel-item" onclick="openProduct(0)">
+                            <div class="product-image">
+                                <span class="placeholder-text">Featured Product 1</span>
+                                <div class="click-hint">Click to view product</div>
+                            </div>
+                        </div>
+                        <div class="carousel-item" onclick="openProduct(1)">
+                            <div class="product-image">
+                                <span class="placeholder-text">Featured Product 2</span>
+                                <div class="click-hint">Click to view product</div>
+                            </div>
+                        </div>
+                        <div class="carousel-item" onclick="openProduct(2)">
+                            <div class="product-image">
+                                <span class="placeholder-text">Featured Product 3</span>
+                                <div class="click-hint">Click to view product</div>
+                            </div>
+                        </div>
+                        <div class="carousel-item" onclick="openProduct(3)">
+                            <div class="product-image">
+                                <span class="placeholder-text">Featured Product 4</span>
+                                <div class="click-hint">Click to view product</div>
+                            </div>
+                        </div>
+                        <div class="carousel-item" onclick="openProduct(4)">
+                            <div class="product-image">
+                                <span class="placeholder-text">Featured Product 5</span>
+                                <div class="click-hint">Click to view product</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="carousel-btn next" onclick="moveCarousel(1)">›</button>
+                <div class="carousel-indicators" id="indicators"></div>
+            </div>
+        </div>
+
+        <div class="bottom-section">
+            <div class="info-card">
+                <h3>Your Style Profile</h3>
+                <p>Our AI has analyzed your preferences across color palettes, patterns, textures, and aesthetic choices to deliver these personalized recommendations.</p>
+            </div>
+
+            <div class="side-products">
+                <div class="side-product" onclick="openProduct(5)">
+                    <span class="placeholder-text">Product 6</span>
+                </div>
+                <div class="side-product" onclick="openProduct(6)">
+                    <span class="placeholder-text">Product 7</span>
+                </div>
+            </div>
+
+            <div class="home-btn-wrapper">
+                <button class="home-btn" onclick="goHome()">
+                    <span>Start Over</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Carousel functionality
+        let currentSlide = 0;
+        const carousel = document.getElementById('carousel');
+        const indicators = document.getElementById('indicators');
+        const totalSlides = document.querySelectorAll('.carousel-item').length;
+
+        // Product URLs - to be filled in later
+        const productUrls = [
+            '', // Product 1 URL
+            '', // Product 2 URL
+            '', // Product 3 URL
+            '', // Product 4 URL
+            '', // Product 5 URL
+            '', // Product 6 URL
+            '', // Product 7 URL
+        ];
+
+        // Create indicators
+        for (let i = 0; i < totalSlides; i++) {
+            const indicator = document.createElement('div');
+            indicator.className = 'indicator';
+            if (i === 0) indicator.classList.add('active');
+            indicator.onclick = () => goToSlide(i);
+            indicators.appendChild(indicator);
+        }
+
+        function updateCarousel() {
+            carousel.style.transform = `translateX(-${currentSlide * 100}%)`;
+            
+            // Update indicators
+            document.querySelectorAll('.indicator').forEach((indicator, index) => {
+                indicator.classList.toggle('active', index === currentSlide);
+            });
+        }
+
+        function moveCarousel(direction) {
+            currentSlide += direction;
+            
+            if (currentSlide < 0) {
+                currentSlide = totalSlides - 1;
+            } else if (currentSlide >= totalSlides) {
+                currentSlide = 0;
+            }
+            
+            updateCarousel();
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateCarousel();
+        }
+
+        // Auto-play carousel
+        let autoPlay = setInterval(() => {
+            moveCarousel(1);
+        }, 5000);
+
+        // Pause auto-play on hover
+        const carouselContainer = document.querySelector('.carousel-container');
+        carouselContainer.addEventListener('mouseenter', () => {
+            clearInterval(autoPlay);
+        });
+
+        carouselContainer.addEventListener('mouseleave', () => {
+            autoPlay = setInterval(() => {
+                moveCarousel(1);
+            }, 5000);
+        });
+
+        // Product click handlers
+        function openProduct(index) {
+            if (productUrls[index]) {
+                window.open(productUrls[index], '_blank');
+            } else {
+                console.log(`Product ${index + 1} clicked - URL to be added`);
+                // Remove alert in production, just for demonstration
+            }
+        }
+
+        function goHome() {
+            // Navigate back to selection page
+            window.history.back();
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                moveCarousel(-1);
+            } else if (e.key === 'ArrowRight') {
+                moveCarousel(1);
+            }
+        });
+    </script>
+</body>
+</html>
