@@ -64,10 +64,46 @@
             letter-spacing: -1.5px;
         }
 
+        .theme-title {
+            color: #00ffa3;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
         .header p {
             color: rgba(255, 255, 255, 0.6);
             font-size: 1.1rem;
             font-weight: 400;
+        }
+
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress-text {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .progress-bar-bg {
+            background: rgba(255, 255, 255, 0.1);
+            height: 6px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #00ffa3 0%, #00cc82 100%);
+            height: 100%;
+            width: 14.28%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px rgba(0, 255, 163, 0.5);
         }
 
         .card {
@@ -263,9 +299,82 @@
             transform: none;
         }
 
+        .btn-primary:disabled::before {
+            opacity: 0;
+        }
+
+        .review-screen {
+            display: none;
+        }
+
+        .review-screen.active {
+            display: block;
+        }
+
+        .review-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .review-header h2 {
+            color: #fff;
+            font-size: 2.4rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .review-header p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1rem;
+        }
+
+        .theme-section {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 255, 163, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+        }
+
+        .theme-section h3 {
+            color: #00ffa3;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .selected-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .selected-item {
+            background: rgba(0, 255, 163, 0.1);
+            color: #00ffa3;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid rgba(0, 255, 163, 0.3);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2rem;
+            }
+
+            .theme-title {
+                font-size: 1.1rem;
             }
 
             .card {
@@ -277,6 +386,7 @@
             }
 
             .grid {
+                grid-template-columns: repeat(3, 1fr);
                 gap: 12px;
             }
 
@@ -301,12 +411,22 @@
         <div class="header">
             <div class="logo">Customify.ai</div>
             <h1>Pick Your Style</h1>
-            <p>Select the images that speak to you</p>
+            <p class="theme-title" id="themeTitle">Theme 1: Colors</p>
+            <p id="themeDescription">Select the colors that speak to you</p>
         </div>
 
-        <div class="card">
+        <div class="progress-container">
+            <div class="progress-text">
+                <span id="progressText">Step 1 of 7</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+
+        <div class="card" id="selectionScreen">
             <div class="grid-container">
-                <div class="grid">
+                <div class="grid" id="imageGrid">
                     <button class="image-button" data-id="1"></button>
                     <button class="image-button" data-id="2"></button>
                     <button class="image-button" data-id="3"></button>
@@ -328,8 +448,25 @@
                 </div>
                 <div class="button-group">
                     <button class="btn btn-secondary" id="clearBtn">Clear All</button>
-                    <button class="btn btn-primary" id="submitBtn" disabled>
+                    <button class="btn btn-primary" id="continueBtn" disabled>
                         <span>Continue</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card review-screen" id="reviewScreen">
+            <div class="review-header">
+                <h2>Your Selections</h2>
+                <p>Review all your choices across the themes</p>
+            </div>
+            <div id="reviewContent"></div>
+            <div class="actions" style="margin-top: 30px;">
+                <div></div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" id="backBtn">Go Back</button>
+                    <button class="btn btn-primary" id="submitBtn">
+                        <span>Submit Choices</span>
                     </button>
                 </div>
             </div>
@@ -337,18 +474,146 @@
     </div>
 
     <script>
+        // Configuration
+        const themes = [
+            {
+                name: "Nature",
+                description: "Select the nature aesthetic that appeals to you",
+                images: [] // Add image URLs here
+            },
+            {
+                name: "Pets",
+                description: "Choose the pets you would want or already own",
+                images: []
+            },
+            {
+                name: "Hobbies",
+                description: "Pick hobbies that interest you",
+                images: []
+            },
+            {
+                name: "Music Genres",
+                description: "Select your favorite music genres",
+                images: []
+            },
+            {
+                name: "Sports",
+                description: "Choose the sports you enjoy",
+                images: []
+            },
+            {
+                name: "Houses",
+                description: "Pick your dream house styles",
+                images: []
+            },
+            {
+                name: "Vacation",
+                description: "Select your ideal vacation spots",
+                images: []
+            }
+        ];
+
+        // State management
+        let currentTheme = 0;
+        let allSelections = {};
+        
+        // DOM elements
+        const imageGrid = document.getElementById('imageGrid');
         const buttons = document.querySelectorAll('.image-button');
         const countDisplay = document.getElementById('count');
-        const submitBtn = document.getElementById('submitBtn');
+        const continueBtn = document.getElementById('continueBtn');
         const clearBtn = document.getElementById('clearBtn');
-        let selectedCount = 0;
+        const themeTitle = document.getElementById('themeTitle');
+        const themeDescription = document.getElementById('themeDescription');
+        const progressText = document.getElementById('progressText');
+        const progressBar = document.getElementById('progressBar');
+        const selectionScreen = document.getElementById('selectionScreen');
+        const reviewScreen = document.getElementById('reviewScreen');
+        const reviewContent = document.getElementById('reviewContent');
+        const backBtn = document.getElementById('backBtn');
+        const submitBtn = document.getElementById('submitBtn');
 
-        function updateCount() {
-            selectedCount = document.querySelectorAll('.image-button.selected').length;
-            countDisplay.textContent = selectedCount;
-            submitBtn.disabled = selectedCount === 0;
+        // Initialize
+        function updateThemeDisplay() {
+            const theme = themes[currentTheme];
+            themeTitle.textContent = `Theme ${currentTheme + 1}: ${theme.name}`;
+            themeDescription.textContent = theme.description;
+            progressText.textContent = `Step ${currentTheme + 1} of ${themes.length}`;
+            progressBar.style.width = `${((currentTheme + 1) / themes.length) * 100}%`;
+            
+            // Add fade-in animation
+            imageGrid.classList.remove('fade-in');
+            void imageGrid.offsetWidth; // Trigger reflow
+            imageGrid.classList.add('fade-in');
+            
+            // Load images for current theme if available
+            loadThemeImages();
+            
+            // Restore previous selections for this theme
+            restoreSelections();
         }
 
+        function loadThemeImages() {
+            const theme = themes[currentTheme];
+            buttons.forEach((button, index) => {
+                if (theme.images && theme.images[index]) {
+                    button.innerHTML = `<img src="${theme.images[index]}" alt="Option ${index + 1}">`;
+                } else {
+                    button.innerHTML = '';
+                }
+            });
+        }
+
+        function restoreSelections() {
+            // Clear all selections first
+            buttons.forEach(button => button.classList.remove('selected'));
+            
+            // Restore if exists
+            if (allSelections[currentTheme]) {
+                allSelections[currentTheme].forEach(id => {
+                    const button = document.querySelector(`[data-id="${id}"]`);
+                    if (button) button.classList.add('selected');
+                });
+            }
+            updateCount();
+        }
+
+        function updateCount() {
+            const selectedCount = document.querySelectorAll('.image-button.selected').length;
+            countDisplay.textContent = selectedCount;
+            continueBtn.disabled = selectedCount === 0;
+        }
+
+        function saveCurrentSelections() {
+            const selected = Array.from(document.querySelectorAll('.image-button.selected'))
+                .map(btn => btn.dataset.id);
+            allSelections[currentTheme] = selected;
+        }
+
+        function showReviewScreen() {
+            selectionScreen.style.display = 'none';
+            reviewScreen.classList.add('active');
+            
+            // Build review content
+            reviewContent.innerHTML = '';
+            themes.forEach((theme, index) => {
+                const selections = allSelections[index] || [];
+                const section = document.createElement('div');
+                section.className = 'theme-section';
+                section.innerHTML = `
+                    <h3>Theme ${index + 1}: ${theme.name}</h3>
+                    <div class="selected-items">
+                        ${selections.length > 0 
+                            ? selections.map(id => `<div class="selected-item">Option ${id}</div>`).join('')
+                            : '<div class="selected-item" style="background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5); border-color: rgba(255,255,255,0.1);">No selections</div>'
+                        }
+                    </div>
+                `;
+                reviewContent.appendChild(section);
+            });
+        }
+
+        // Event listeners
         buttons.forEach(button => {
             button.addEventListener('click', function() {
                 this.classList.toggle('selected');
@@ -361,15 +626,51 @@
             updateCount();
         });
 
-        submitBtn.addEventListener('click', () => {
-            const selected = Array.from(document.querySelectorAll('.image-button.selected'))
-                .map(btn => btn.dataset.id);
-            console.log('Selected images:', selected);
-            alert(`You've selected ${selected.length} image(s)`);
+        continueBtn.addEventListener('click', () => {
+            saveCurrentSelections();
+            
+            if (currentTheme < themes.length - 1) {
+                // Move to next theme
+                currentTheme++;
+                buttons.forEach(button => button.classList.remove('selected'));
+                updateThemeDisplay();
+                updateCount();
+            } else {
+                // Show review screen
+                showReviewScreen();
+            }
         });
 
-        // Example: To add images to buttons, use:
-        // buttons[0].innerHTML = '<img src="your-image-url.jpg" alt="Image 1">';
+        backBtn.addEventListener('click', () => {
+            reviewScreen.classList.remove('active');
+            selectionScreen.style.display = 'block';
+            currentTheme = themes.length - 1;
+            updateThemeDisplay();
+        });
+
+        submitBtn.addEventListener('click', () => {
+            console.log('All selections:', allSelections);
+            alert(`Thank you! You've completed all ${themes.length} themes.\n\nYour selections have been saved.`);
+            
+            // Here you would typically send the data to your backend
+            // Example: fetch('/api/save-selections', { method: 'POST', body: JSON.stringify(allSelections) })
+        });
+
+        // Initialize first theme
+        updateThemeDisplay();
+
+        // Preload images (if you add image URLs to themes)
+        function preloadImages() {
+            themes.forEach(theme => {
+                if (theme.images) {
+                    theme.images.forEach(src => {
+                        const img = new Image();
+                        img.src = src;
+                    });
+                }
+            });
+        }
+        preloadImages();
     </script>
 </body>
 </html>
