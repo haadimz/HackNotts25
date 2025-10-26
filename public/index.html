@@ -54,6 +54,7 @@
             color: #00ffa3;
             letter-spacing: -1px;
             margin-bottom: 8px;
+            text-transform: uppercase;
         }
 
         .header h1 {
@@ -368,6 +369,90 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #0a0a0a;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .loading-screen.active {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-content h2 {
+            color: #fff;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+        }
+
+        .loading-content p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(0, 255, 163, 0.1);
+            border-top: 4px solid #00ffa3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-dots {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: #00ffa3;
+            border-radius: 50%;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2rem;
@@ -402,6 +487,14 @@
                 flex: 1;
                 font-size: 0.9rem;
                 padding: 12px 24px;
+            }
+
+            .loading-content h2 {
+                font-size: 1.5rem;
+            }
+
+            .loading-content p {
+                font-size: 1rem;
             }
         }
     </style>
@@ -466,9 +559,22 @@
                 <div class="button-group">
                     <button class="btn btn-secondary" id="backBtn">Go Back</button>
                     <button class="btn btn-primary" id="submitBtn">
-                        <span>Submit Choices</span>
+                        <span>Get Recommendations</span>
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <h2>Analyzing Your Style</h2>
+            <p>Our AI is curating personalized recommendations...</p>
+            <div class="spinner"></div>
+            <div class="loading-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
             </div>
         </div>
     </div>
@@ -477,38 +583,38 @@
         // Configuration
         const themes = [
             {
-                name: "Nature",
-                description: "Select the nature aesthetic that appeals to you",
+                name: "Colors",
+                description: "Select the colors that speak to you",
                 images: [] // Add image URLs here
             },
             {
-                name: "Pets",
-                description: "Choose the pets you would want or already own",
+                name: "Patterns",
+                description: "Choose patterns you find appealing",
                 images: []
             },
             {
-                name: "Hobbies",
-                description: "Pick hobbies that interest you",
+                name: "Textures",
+                description: "Pick textures that resonate with you",
                 images: []
             },
             {
-                name: "Music Genres",
-                description: "Select your favorite music genres",
+                name: "Styles",
+                description: "Select your preferred styles",
                 images: []
             },
             {
-                name: "Sports",
-                description: "Choose the sports you enjoy",
+                name: "Moods",
+                description: "Choose moods that reflect your taste",
                 images: []
             },
             {
-                name: "Houses",
-                description: "Pick your dream house styles",
+                name: "Themes",
+                description: "Pick themes you connect with",
                 images: []
             },
             {
-                name: "Vacation",
-                description: "Select your ideal vacation spots",
+                name: "Aesthetics",
+                description: "Select your favorite aesthetics",
                 images: []
             }
         ];
@@ -636,8 +742,22 @@
                 updateThemeDisplay();
                 updateCount();
             } else {
-                // Show review screen
-                showReviewScreen();
+                // Last theme completed - show loading screen and redirect
+                const loadingScreen = document.getElementById('loadingScreen');
+                loadingScreen.classList.add('active');
+                
+                // Store selections in sessionStorage to pass to recommendations page
+                sessionStorage.setItem('userSelections', JSON.stringify(allSelections));
+                
+                // Simulate processing time (2-3 seconds) then redirect
+                setTimeout(() => {
+                    // In production, you would send data to backend here
+                    // fetch('/api/save-selections', { method: 'POST', body: JSON.stringify(allSelections) })
+                    
+                    // Redirect to recommendations page
+                    window.location.href = 'feedback.html';
+                    
+                }, 2500);
             }
         });
 
@@ -650,10 +770,28 @@
 
         submitBtn.addEventListener('click', () => {
             console.log('All selections:', allSelections);
-            alert(`Thank you! You've completed all ${themes.length} themes.\n\nYour selections have been saved.`);
             
-            // Here you would typically send the data to your backend
-            // Example: fetch('/api/save-selections', { method: 'POST', body: JSON.stringify(allSelections) })
+            // Show loading screen
+            const loadingScreen = document.getElementById('loadingScreen');
+            loadingScreen.classList.add('active');
+            
+            // Store selections in sessionStorage to pass to recommendations page
+            sessionStorage.setItem('userSelections', JSON.stringify(allSelections));
+            
+            // Simulate processing time (2-3 seconds) then redirect
+            setTimeout(() => {
+                // In production, you would send data to backend here
+                // fetch('/api/save-selections', { method: 'POST', body: JSON.stringify(allSelections) })
+                
+                // Redirect to recommendations page
+                // If both pages are in the same HTML file, you can show/hide sections instead
+                // For separate files, use: window.location.href = 'recommendations.html';
+                
+                // For demo purposes, we'll show an alert
+                // Replace this with actual page navigation
+                window.location.href = 'feedback.html';
+                
+            }, 2500);
         });
 
         // Initialize first theme
